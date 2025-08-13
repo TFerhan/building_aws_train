@@ -16,12 +16,10 @@ from huggingface_hub import HfApi, upload_file, hf_hub_download
 import torch
 import os
 from tqdm.auto import tqdm
+from datasets import load_dataset
 
 login(os.getenv("HF_TOKEN"))
 
-from huggingface_hub import HfApi, upload_file, hf_hub_download
-
-from datasets import load_dataset
 dataset = load_dataset("tferhan/morocco_satellite_buildings_semantic_segmentation_512_v2", download_mode="force_redownload")
 
 hf_hub_download(repo_id="tferhan/mask2former_semantic_ma", filename="mask2former_semantic_ma_epoch_7.pth", repo_type="model", local_dir=".")
