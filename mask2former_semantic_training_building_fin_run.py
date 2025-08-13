@@ -28,7 +28,7 @@ import torch
 import os
 from tqdm.auto import tqdm
 
-login("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")
+login(os.getenv("HF_TOKEN"))
 
 from huggingface_hub import HfApi, upload_file, hf_hub_download
 
