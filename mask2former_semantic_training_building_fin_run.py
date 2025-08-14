@@ -167,7 +167,7 @@ metric = evaluate.load("mean_iou")
 
 optimizer = torch.optim.Adam(model.parameters(), lr=5e-5)
 
-checkpoint = torch.load("mask2former_semantic_ma_epoch_7.pth", map_location=device)
+checkpoint = torch.load("best_model.pth.pth", map_location=device)
 model.load_state_dict(checkpoint["model_state_dict"])
 optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
 
@@ -184,7 +184,7 @@ log_file = "training_log.json"
 
 api = HfApi()
 
-for epoch in range(8, 50):
+for epoch in range(11, 50):
     print(f"\nEpoch {epoch+1}/50")
     model.train()
     train_loss_sum = 0
@@ -275,8 +275,8 @@ for epoch in range(8, 50):
             break
     if epoch % 10 == 0:
       repo_id = "tferhan/mask2former_semantic_ma"
-      upload_file("best_model.pth", "best_model.pth", repo_id=repo_id, repo_type="model")
-      upload_file("./best_model_hf/model.safetensors", "model.safetensors", repo_id=repo_id, repo_type="model")
+      upload_file(path_or_fileobj="best_model.pth", path_in_repo="best_model.pth", repo_id=repo_id, repo_type="model")
+      upload_file(path_or_fileobj="./best_model_hf/model.safetensors", path_in_repo="model.safetensors", repo_id=repo_id, repo_type="model")
 
 
 
@@ -285,7 +285,7 @@ for epoch in range(8, 50):
 
 
 repo_id = "tferhan/mask2former_semantic_ma"
-upload_file("best_model.pth", "best_model.pth", repo_id=repo_id, repo_type="model")
-upload_file("./best_model_hf/model.safetensors", "model.safetensors", repo_id=repo_id, repo_type="model")
+upload_file(path_or_fileobj="best_model.pth", path_in_repo="best_model.pth", repo_id=repo_id, repo_type="model")
+upload_file(path_or_fileobj="./best_model_hf/model.safetensors", path_in_repo="model.safetensors", repo_id=repo_id, repo_type="model")
 
 os.system("sudo shutdown now")
