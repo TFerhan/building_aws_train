@@ -17,6 +17,7 @@ import torch
 import os
 from tqdm.auto import tqdm
 from datasets import load_dataset
+from torch.utils.data import DataLoader
 
 login(os.getenv("HF_TOKEN"))
 
@@ -127,8 +128,6 @@ test_dataset = ImageSegmentationDataset(test_ds, transform=test_transform)
 
 preprocessor = Mask2FormerImageProcessor(num_labels = 5, ignore_index=0, do_reduce_labels=False, do_resize=False, do_rescale=False, do_normalize=False)
 
-from torch.utils.data import DataLoader
-
 def collate_fn(batch):
     inputs = list(zip(*batch))
     images = inputs[0]
@@ -181,6 +180,8 @@ patience = 10
 no_improve_epochs = 0
 best_state = None
 log_history = []
+log_file = "training_log.json"
+
 api = HfApi()
 
 for epoch in range(8, 50):
@@ -228,6 +229,24 @@ for epoch in range(8, 50):
     mean_iou = results["mean_iou"]
     per_category_iou = results["per_category_iou"]
     per_category_accuracy = results["per_category_accuracy"]
+    log_entry = {
+    "epoch": epoch + 1,
+    "train_loss": avg_train_loss,
+    "val_loss": avg_val_loss,
+    "mean_iou": mean_iou,
+    "per_category_iou": {id2label[i]: float(v) for i, v in enumerate(per_category_iou)},
+    "per_category_accuracy": {id2label[i]: float(v) for i, v in enumerate(per_category_accuracy)}
+    }
+    log_history.append(log_entry)
+    with open(log_file, "w") as f:
+        json.dump(log_history, f, indent=2)
+
+    upload_file(
+        path_or_fileobj=log_file,
+        path_in_repo=log_file,
+        repo_id="tferhan/mask2former_semantic_ma",
+        repo_type="model"
+    )
 
 
     print(f"Train Loss: {avg_train_loss:.4f} | Val Loss: {avg_val_loss:.4f} | mIoU: {mean_iou:.4f} | per catg IoU: {per_category_iou} | per catg Acc: {per_category_accuracy}")
@@ -244,13 +263,13 @@ for epoch in range(8, 50):
         torch.save(best_state, "best_model.pth")
         model.save_pretrained("./best_model_hf")
         preprocessor.save_pretrained("./best_model_hf")
-        print("✅ Improvement detected — model saved.")
+        print("Improvement detected — model saved.")
         no_improve_epochs = 0
     else:
         no_improve_epochs += 1
-        print(f"⚠️ No improvement for {no_improve_epochs} epoch(s).")
+        print(f" No improvement for {no_improve_epochs} epoch(s).")
         if no_improve_epochs >= patience:
-            print(f"⏪ Rolling back to epoch {best_epoch}")
+            print(f"Rolling back to epoch {best_epoch}")
             model.load_state_dict(best_state["model_state_dict"])
             optimizer.load_state_dict(best_state["optimizer_state_dict"])
             break
