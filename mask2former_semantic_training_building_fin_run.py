@@ -167,7 +167,7 @@ metric = evaluate.load("mean_iou")
 
 optimizer = torch.optim.Adam(model.parameters(), lr=5e-5)
 
-checkpoint = torch.load("best_model.pth.pth", map_location=device)
+checkpoint = torch.load("best_model.pth", map_location=device)
 model.load_state_dict(checkpoint["model_state_dict"])
 optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
 
