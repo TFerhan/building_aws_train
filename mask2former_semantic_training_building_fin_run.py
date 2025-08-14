@@ -181,6 +181,7 @@ patience = 10
 no_improve_epochs = 0
 best_state = None
 log_history = []
+api = HfApi()
 
 for epoch in range(8, 50):
     print(f"\nEpoch {epoch+1}/50")
@@ -253,14 +254,18 @@ for epoch in range(8, 50):
             model.load_state_dict(best_state["model_state_dict"])
             optimizer.load_state_dict(best_state["optimizer_state_dict"])
             break
+    if epoch % 10 == 0:
+      repo_id = "tferhan/mask2former_semantic_ma"
+      upload_file("best_model.pth", "best_model.pth", repo_id=repo_id, repo_type="model")
+      upload_file("./best_model_hf/model.safetensors", "model.safetensors", repo_id=repo_id, repo_type="model")
 
 
 
 
 
-api = HfApi()
+
+
 repo_id = "tferhan/mask2former_semantic_ma"
-
 upload_file("best_model.pth", "best_model.pth", repo_id=repo_id, repo_type="model")
 upload_file("./best_model_hf/model.safetensors", "model.safetensors", repo_id=repo_id, repo_type="model")
 
